@@ -1,0 +1,14 @@
+[{
+  "modid": "jsonrecipemanager",
+  "name": "JSON Recipe Manager",
+  "description": "Custom recipes! Lots and lots of custom recipes!",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Face_of_Cat"],
+  "credits": "The Forge, FML guys and my wife.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}]
