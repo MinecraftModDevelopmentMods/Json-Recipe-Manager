@@ -1,8 +1,12 @@
 package net.ndrei.jsonrecipemanager
 
+import net.minecraft.item.crafting.IRecipe
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.common.event.FMLInitializationEvent
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.registry.GameRegistry
 import org.apache.logging.log4j.Logger
 import java.io.File
 
@@ -23,6 +27,18 @@ class JsonRecipeManagerMod {
         this.configFolder = ev.modConfigurationDirectory
 
         MinecraftForge.EVENT_BUS.register(JsonRecipeManagerEvents)
+
+        JsonRecipeManagerEvents.parseFiles(GameRegistry.findRegistry(IRecipe::class.java), "pre_init")
+    }
+
+    @Mod.EventHandler
+    fun init(ev: FMLInitializationEvent) {
+        JsonRecipeManagerEvents.parseFiles(GameRegistry.findRegistry(IRecipe::class.java), "init")
+    }
+
+    @Mod.EventHandler
+    fun postInit(ev: FMLPostInitializationEvent) {
+        JsonRecipeManagerEvents.parseFiles(GameRegistry.findRegistry(IRecipe::class.java), "post_init")
     }
 
     companion object {

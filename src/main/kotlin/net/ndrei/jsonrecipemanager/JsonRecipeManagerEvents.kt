@@ -8,6 +8,7 @@ import net.minecraftforge.common.crafting.JsonContext
 import net.minecraftforge.event.RegistryEvent
 import net.minecraftforge.fml.common.FMLLog
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.registries.IForgeRegistry
 import net.minecraftforge.registries.IForgeRegistryModifiable
 import org.apache.commons.io.IOUtils
 import java.io.BufferedReader
@@ -23,6 +24,10 @@ object JsonRecipeManagerEvents {
 
     @SubscribeEvent
     fun registerRecipes(ev: RegistryEvent.Register<IRecipe>) {
+        this.parseFiles(ev.registry)
+    }
+
+    fun parseFiles(registry: IForgeRegistry<IRecipe>, moment: String = "") {
         val config = File(JsonRecipeManagerMod.instance.configFolder, "JSONRecipes")
         if (config.exists() && config.isDirectory) {
             val ctx = JsonContext(JsonRecipeManagerMod.MODID)
@@ -60,51 +65,57 @@ object JsonRecipeManagerEvents {
 
                             if (json.isJsonArray) {
                                 json.asJsonArray.forEach {
-                                    VanillaRecipeImporter.import(it.asJsonObject, ctx, ev.registry)
+                                    VanillaRecipeImporter.import(it.asJsonObject, ctx, registry)
                                 }
                             }
                             else if (json.isJsonObject) {
                                 val node = json.asJsonObject
-                                if (node.has("remove")) {
-                                    val registry = ev.registry
-                                    if ((registry is IForgeRegistryModifiable<IRecipe>) && !registry.isLocked) {
-                                        val toRemove = mutableListOf<ResourceLocation>()
-                                        node.getAsJsonArray("remove").forEach {
-                                            val info = it.asJsonObject
-                                            if (info.has("name")) {
-                                                val name = info.get("name").asString
-                                                ev.registry.forEach {
-                                                    if ((it.registryName != null) && (it.registryName.toString() == name)) {
-                                                        toRemove.add(it.registryName!!)
+                                val jsonMoment = if (node.has("when")) node.get("when").asString else ""
+                                if (jsonMoment == moment) {
+                                    if (node.has("remove")) {
+                                        if ((registry is IForgeRegistryModifiable<IRecipe>) && !registry.isLocked) {
+                                            val toRemove = mutableListOf<ResourceLocation>()
+                                            node.getAsJsonArray("remove").forEach {
+                                                val info = it.asJsonObject
+                                                if (info.has("name")) {
+                                                    val name = info.get("name").asString
+                                                    registry.forEach {
+                                                        if ((it.registryName != null) && (it.registryName.toString() == name)) {
+                                                            toRemove.add(it.registryName!!)
+                                                        }
                                                     }
-                                                }
-                                            } else if (info.has("mod")) {
-                                                val mod = info.get("mod").asString
-                                                ev.registry.forEach {
-                                                    if ((it.registryName != null) && (it.registryName?.resourcePath == mod)) {
-                                                        toRemove.add(it.registryName!!)
+                                                } else if (info.has("mod")) {
+                                                    val mod = info.get("mod").asString
+                                                    registry.forEach {
+                                                        if ((it.registryName != null) && (it.registryName?.resourcePath == mod)) {
+                                                            toRemove.add(it.registryName!!)
+                                                        }
                                                     }
-                                                }
-                                            } else if (info.has("item")) {
-                                                val item = info.get("item").asString
-                                                ev.registry.forEach {
-                                                    if ((it.registryName != null) && (it.recipeOutput.item.registryName.toString() == item)) {
-                                                        toRemove.add(it.registryName!!)
+                                                } else if (info.has("item")) {
+                                                    val item = info.get("item").asString
+                                                    val data = if (info.has("data"))
+                                                        info.get("data").asInt
+                                                    else
+                                                        -1
+                                                    registry.forEach {
+                                                        if ((it.registryName != null) && (it.recipeOutput.item.registryName.toString() == item) &&
+                                                                ((data == -1) || (it.recipeOutput.metadata == data))) {
+                                                            toRemove.add(it.registryName!!)
+                                                        }
                                                     }
                                                 }
                                             }
+                                            toRemove.forEach { registry.remove(it) }
                                         }
-                                        toRemove.forEach { registry.remove(it) }
-                                    }
 
-                                    if (node.has("add")) {
-                                        node.getAsJsonArray("add").forEach {
-                                            VanillaRecipeImporter.import(it.asJsonObject, ctx, ev.registry)
+                                        if (node.has("add")) {
+                                            node.getAsJsonArray("add").forEach {
+                                                VanillaRecipeImporter.import(it.asJsonObject, ctx, registry)
+                                            }
                                         }
+                                    } else {
+                                        VanillaRecipeImporter.import(node, ctx, registry)
                                     }
-                                }
-                                else {
-                                    VanillaRecipeImporter.import(node, ctx, ev.registry)
                                 }
                             }
                             else
