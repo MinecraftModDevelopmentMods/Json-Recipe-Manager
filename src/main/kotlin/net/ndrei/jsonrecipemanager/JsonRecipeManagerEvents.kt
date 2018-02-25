@@ -6,7 +6,6 @@ import net.minecraft.util.JsonUtils
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.common.crafting.JsonContext
 import net.minecraftforge.event.RegistryEvent
-import net.minecraftforge.fml.common.FMLLog
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.registries.IForgeRegistry
 import net.minecraftforge.registries.IForgeRegistryModifiable
@@ -14,7 +13,6 @@ import org.apache.commons.io.IOUtils
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
-import java.nio.file.Files
 
 /**
  * Created by CF on 2017-07-10.
@@ -30,7 +28,7 @@ object JsonRecipeManagerEvents {
     fun parseFiles(registry: IForgeRegistry<IRecipe>, moment: String = "") {
         val config = File(JsonRecipeManagerMod.instance.configFolder, "JSONRecipes")
         if (config.exists() && config.isDirectory) {
-            val ctx = JsonContext(JsonRecipeManagerMod.MODID)
+            val ctx = JsonContext(MOD_ID)
 
             val consts = File(config, "_constants.json")
             if (consts.exists() && consts.isFile) {

@@ -19,7 +19,7 @@ object VanillaRecipeImporter: IRecipeImporter {
             val recipe = CraftingHelper.getRecipe(json, context)
 
             if (recipe.registryName == null) {
-                recipe.registryName = ResourceLocation(JsonRecipeManagerMod.MODID, "recipe_${this.recipeIndex++}")
+                recipe.registryName = ResourceLocation(MOD_ID, "recipe_${this.recipeIndex++}")
             }
 
             registry.register(recipe)

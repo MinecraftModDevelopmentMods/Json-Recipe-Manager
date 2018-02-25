@@ -13,11 +13,12 @@ import java.io.File
 /**
  * Created by CF on 2017-07-10.
  */
-@Mod(modid = JsonRecipeManagerMod.MODID,
-        dependencies = "after:*", useMetadata = true,
-        modLanguage = "kotlin", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter")
+@Mod(modid = MOD_ID, version = MOD_VERSION, name = MOD_NAME,
+    acceptedMinecraftVersions = MOD_MC_VERSION,
+    dependencies = MOD_DEPENDENCIES,
+    certificateFingerprint = MOD_SIGN_FINGERPRINT,
+    useMetadata = true, modLanguage = "kotlin", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter")
 class JsonRecipeManagerMod {
-
     lateinit var configFolder: File
         private set
 
@@ -42,8 +43,6 @@ class JsonRecipeManagerMod {
     }
 
     companion object {
-        const val MODID = "jsonrecipemanager"
-
         @Mod.Instance
         lateinit var instance: JsonRecipeManagerMod
 
